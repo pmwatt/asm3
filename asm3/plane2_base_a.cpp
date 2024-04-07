@@ -61,6 +61,7 @@ const float PLANE_ROTATION = 5.0f;                      // Plane rotated by 5 de
 // Propeller dimensions (subpart)
 const float PP_WIDTH = 0.25f;
 const float PP_LENGTH = 1.5f;
+const float PP_HEIGHT = 1.5f;
 
 // Propeller transforms
 const gmtl::Point3f PROPELLER_POS(P_WIDTH / 4, 0, 0);     // Propeller position on the plane (w.r.t. plane's frame)
@@ -128,9 +129,10 @@ void KeyboardFunc(unsigned char key, int x, int y);
 void MouseFunc(int button, int state, int x, int y);
 void MotionFunc(int x, int y);
 void ReshapeFunc(int w, int h);
+void drawCube(const float width, const float length, const float height, const float colours[3]);
 void DrawCoordinateFrame(const float l);
 void DrawTurtleShell(const float width, const float length, const float height);
-void DrawPropeller(const float width, const float length);
+void DrawPropeller(const float width, const float length, const float height);
 
 //|____________________________________________________________________
 //|
@@ -259,90 +261,106 @@ void DisplayFunc(void)
 	//| Draw traversal begins, start from world (root) node
 	//|____________________________________________________________________
 
-	  // World node: draws world coordinate frame
+	// World node: draws world coordinate frame
 	DrawCoordinateFrame(10);
 
 	// World-relative camera:
 	if (cam_id != 0) {
 		glPushMatrix();
-		glRotatef(azimuth[0], 0, 1, 0);
-		glRotatef(elevation[0], 1, 0, 0);
-		glTranslatef(0, 0, distance[0]);
-		DrawCoordinateFrame(1);
+			glRotatef(azimuth[0], 0, 1, 0);
+			glRotatef(elevation[0], 1, 0, 0);
+			glTranslatef(0, 0, distance[0]);
+			DrawCoordinateFrame(1);
 		glPopMatrix();
 	}
 
-	// Plane 2 body:
+	// Turtle 2 body:
 	glPushMatrix();
-	gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
-	axis = aa.getAxis();
-	angle = aa.getAngle();
-	glTranslatef(plane_p[0], plane_p[1], plane_p[2]);
-	glRotatef(gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
-	DrawTurtleShell(P_WIDTH, P_LENGTH, P_HEIGHT); // turtle plane base
-	DrawCoordinateFrame(3);
+		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
+		axis = aa.getAxis();
+		angle = aa.getAngle();
+		glTranslatef(plane_p[0], plane_p[1], plane_p[2]);
+		glRotatef(gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
+		DrawTurtleShell(P_WIDTH, P_LENGTH, P_HEIGHT); // turtle plane base
+		DrawCoordinateFrame(3);
 
-	// Plane 2's camera:
-	glPushMatrix();
-	glRotatef(azimuth[1], 0, 1, 0);
-	glRotatef(elevation[1], 1, 0, 0);
-	glTranslatef(0, 0, distance[1]);
-	DrawCoordinateFrame(1);
-	glPopMatrix();
+		//// head
+		glPushMatrix();
+			glTranslatef(0.0f * P_WIDTH, -0.1f * P_HEIGHT, 0.8f * P_LENGTH);
+			drawCube(0.7f * P_WIDTH, 0.7f * P_LENGTH, 0.45f * P_HEIGHT, colour_lime_green);
+		glPopMatrix();
 
-	// Right Propeller (original) (subpart A):
-	glPushMatrix();
-	glTranslatef(PROPELLER_POS[0], PROPELLER_POS[1], PROPELLER_POS[2]);     // Positions propeller on the plane
-	glRotatef(pp_angle, 0, 0, 1);                                           // Rotates propeller
-	DrawPropeller(PP_WIDTH, PP_LENGTH);
-	DrawCoordinateFrame(1);
-	glPopMatrix();
+		// left eye
+		glPushMatrix();
+			glTranslatef(-0.27f * P_WIDTH, -0.20f * P_HEIGHT, 1.15f * P_LENGTH);
+			drawCube(0.11f * P_WIDTH, 0.11f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+		glPopMatrix();
 
-	// Left Propeller (subpart B):
-	glPushMatrix();
-	glTranslatef(-PROPELLER_POS[0], PROPELLER_POS[1], PROPELLER_POS[2]);     // Positions propeller on the plane
-	glRotatef(pp_angle_left, 0, 0, 1);                                           // Rotates propeller
-	DrawPropeller(PP_WIDTH, PP_LENGTH);
-	DrawCoordinateFrame(1);
-	glPopMatrix();
+		// right eye
+		glPushMatrix();
+			glTranslatef(0.27f * P_WIDTH, -0.20f * P_HEIGHT, 1.15f * P_LENGTH);
+			drawCube(0.11f * P_WIDTH, 0.11f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+		glPopMatrix();
 
-	// Top/Wing Propeller (subpart C):
-	glPushMatrix();
-	glTranslatef(0, P_HEIGHT, -P_LENGTH / 2);     // Positions propeller on the plane
-	glRotatef(pp_angle_top, 0, 0, 1);         // Rotates propeller   
-	DrawPropeller(PP_WIDTH, PP_LENGTH);
-	DrawCoordinateFrame(1);
+		// Plane 2's camera:
+		glPushMatrix();
+			glRotatef(azimuth[1], 0, 1, 0);
+			glRotatef(elevation[1], 1, 0, 0);
+			glTranslatef(0, 0, distance[1]);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
 
-	// Top/Wing Propeller (subpart C):
-	glPushMatrix();
-	glTranslatef(0, PP_LENGTH / 2, 0);     // Positions propeller at the top
-	glRotatef(pp_angle_ss, 0, 1, 0);         // Rotates propeller   
-	glRotatef(-90, 1, 0, 0);         // Rotates propeller   
-	DrawPropeller(PP_WIDTH, PP_LENGTH);
-	DrawCoordinateFrame(1);
-	glPopMatrix();
+		// Right Leg (original) (subpart A):
+		glPushMatrix();
+			glTranslatef(PROPELLER_POS[0], PROPELLER_POS[1], PROPELLER_POS[2]);     // Positions propeller on the plane
+			glRotatef(pp_angle, 0, 0, 1);                                           // Rotates propeller
+			//DrawPropeller(PP_WIDTH, PP_LENGTH);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
 
-	glPopMatrix();
+		// Left Leg (subpart B):
+		glPushMatrix();
+			glTranslatef(-PROPELLER_POS[0], PROPELLER_POS[1], PROPELLER_POS[2]);     // Positions propeller on the plane
+			glRotatef(pp_angle_left, 0, 0, 1);                                           // Rotates propeller
+			//DrawPropeller(PP_WIDTH, PP_LENGTH);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
+
+		// Top/Wing Propeller (subpart C):
+		glPushMatrix();
+			glTranslatef(0, P_HEIGHT, -P_LENGTH / 2);     // Positions propeller on the plane
+			glRotatef(pp_angle_top, 0, 0, 1);         // Rotates propeller   
+			DrawPropeller(PP_WIDTH, PP_LENGTH, PP_HEIGHT);
+			DrawCoordinateFrame(1);
+
+			// Top/Wing Propeller (subpart C):
+			glPushMatrix();
+				glTranslatef(0, PP_LENGTH / 2, 0);     // Positions propeller at the top
+				glRotatef(pp_angle_ss, 0, 1, 0);         // Rotates propeller   
+				glRotatef(-90, 1, 0, 0);         // Rotates propeller   
+				DrawPropeller(PP_WIDTH, PP_LENGTH, PP_HEIGHT);
+				DrawCoordinateFrame(1);
+			glPopMatrix();
+		glPopMatrix();
 	glPopMatrix();
 
 	// Plane 1 body:
 	glPushMatrix();
-	gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
-	axis = aa.getAxis();
-	angle = aa.getAngle();
-	glTranslatef(plane_p1[0], plane_p1[1], plane_p1[2]);
-	glRotatef(gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
-	DrawTurtleShell(P_WIDTH, P_LENGTH, P_HEIGHT);
-	DrawCoordinateFrame(3);
+		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
+		axis = aa.getAxis();
+		angle = aa.getAngle();
+		glTranslatef(plane_p1[0], plane_p1[1], plane_p1[2]);
+		glRotatef(gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
+		DrawTurtleShell(P_WIDTH, P_LENGTH, P_HEIGHT);
+		DrawCoordinateFrame(3);
 
-	// Plane 1's camera:
-	glPushMatrix();
-	glRotatef(azimuth[2], 0, 1, 0);
-	glRotatef(elevation[2], 1, 0, 0);
-	glTranslatef(0, 0, distance[2]);
-	DrawCoordinateFrame(1);
-	glPopMatrix();
-
+		// Plane 1's camera:
+		glPushMatrix();
+			glRotatef(azimuth[2], 0, 1, 0);
+			glRotatef(elevation[2], 1, 0, 0);
+			glTranslatef(0, 0, distance[2]);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
 	glPopMatrix();
 
 	glutSwapBuffers();                          // Replaces glFlush() to use double buffering
@@ -704,7 +722,7 @@ void DrawTurtleShell(const float width, const float length, const float height)
 	float w = width / 2;
 	float l = length / 2;
 
-	glBegin(GL_QUADS);
+	//glBegin(GL_QUADS);
 	drawCube(P_WIDTH, P_LENGTH, P_HEIGHT, colour_brown);
 	//// Body is red
 	//glColor3f( 1.0f, 0.0f, 0.0f);
@@ -717,7 +735,7 @@ void DrawTurtleShell(const float width, const float length, const float height)
 	//glVertex3f(0.0f,    0.0f, 0.0f);
 	//  glVertex3f(0.0f,    0.0f,   -l);
 	//  glVertex3f(0.0f,  height,   -l);
-	glEnd();
+	//glEnd();
 }
 
 //|____________________________________________________________________
@@ -731,8 +749,10 @@ void DrawTurtleShell(const float width, const float length, const float height)
 //! Draws a propeller.
 //|____________________________________________________________________
 
-void DrawPropeller(const float width, const float length)
+void DrawPropeller(const float width, const float length, const float height)
 {
+	//drawCube(width, length, height, colour_lime_green);
+	//drawCube(width, length, height, colour_light_lime_green);
 	float w = width / 2;
 	float l = length / 2;
 
