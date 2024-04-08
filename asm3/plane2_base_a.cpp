@@ -44,10 +44,10 @@
 
 // preset colours
 float colour_brown[3] = { 0.45f, 0.32f, 0.22f };
-float colour_lime_green[3] = { 0.35f, 0.47f, 0.10f };
-float colour_light_lime_green[3] = { 0.45f, 0.57f, 0.20f };
+float colour_lime_green[3] = { 0.10f, 0.35f, 0.47f };
+float colour_light_lime_green[3] = { 0.20f, 0.45f, 0.57f };
 float colour_dark_gray[3] = { 0.25f, 0.25f, 0.25f };
-float colour_darker_gray[3] = { 0.2f, 0.2f, 0.2f };
+float colour_darker_gray[3] = { 0.17f, 0.17f, 0.17f };
 float colour_light_pink[3] = { 0.87f, 0.66f, 0.66f };
 
 // Plane dimensions
@@ -304,13 +304,13 @@ void DisplayFunc(void)
 			// left eye
 			glPushMatrix();
 				glTranslatef(-0.8f, -0.20f, 1.15f);
-				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_darker_gray);
 			glPopMatrix();
 
 			// right eye
 			glPushMatrix();
 				glTranslatef(0.8f, -0.20f, 1.15f);
-				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_darker_gray);
 			glPopMatrix();
 			
 		glPopMatrix();
@@ -393,13 +393,13 @@ void DisplayFunc(void)
 			// left eye
 			glPushMatrix();
 				glTranslatef(-0.8f, -0.20f, 1.15f);
-				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_darker_gray);
 			glPopMatrix();
 
 			// right eye
 			glPushMatrix();
 				glTranslatef(0.8f, -0.20f, 1.15f);
-				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_darker_gray);
 			glPopMatrix();
 			
 		glPopMatrix();
@@ -415,7 +415,7 @@ void DisplayFunc(void)
 		// Right front wing (subpart A):
 		glPushMatrix();
 			glTranslatef(WING_POS[0], WING_POS[1], WING_POS[2]);     // Positions propeller on the plane
-			glRotatef(wing_angle_right, 0, 0, 1);                                           // Rotates propeller
+			glRotatef(-30, 0, 0, 1);                                           // Rotates propeller
 			DrawWing(WING_WIDTH, WING_LENGTH, WING_HEIGHT, true);
 			DrawCoordinateFrame(1);
 		glPopMatrix();
@@ -423,7 +423,7 @@ void DisplayFunc(void)
 		// Left front wing (subpart B):
 		glPushMatrix();
 			glTranslatef(-WING_POS[0], WING_POS[1], WING_POS[2]);     // Positions propeller on the plane
-			glRotatef(wing_angle_left, 0, 0, 1);                      // Rotates propeller
+			glRotatef(30, 0, 0, 1);                      // Rotates propeller
 			DrawWing(WING_WIDTH, WING_LENGTH, WING_HEIGHT, false);
 			DrawCoordinateFrame(1);
 		glPopMatrix();
@@ -431,7 +431,7 @@ void DisplayFunc(void)
 		// Right back wing (subpart A):
 		glPushMatrix();
 			glTranslatef(WING_POS[0], WING_POS[1], -WING_POS[2]);     // Positions propeller on the plane
-			glRotatef(wing_angle_right, 0, 0, 1);                                           // Rotates propeller
+			glRotatef(-30, 0, 0, 1);                                           // Rotates propeller
 			DrawWing(WING_WIDTH_SMALL, WING_LENGTH, WING_HEIGHT, true);
 			DrawCoordinateFrame(1);
 		glPopMatrix();
@@ -439,7 +439,7 @@ void DisplayFunc(void)
 		// Left back wing (subpart B):
 		glPushMatrix();
 			glTranslatef(-WING_POS[0], WING_POS[1], -WING_POS[2]);     // Positions propeller on the plane
-			glRotatef(wing_angle_left, 0, 0, 1);                      // Rotates propeller
+			glRotatef(30, 0, 0, 1);                      // Rotates propeller
 			DrawWing(WING_WIDTH_SMALL, WING_LENGTH, WING_HEIGHT, false);
 			DrawCoordinateFrame(1);
 		glPopMatrix();
@@ -447,14 +447,14 @@ void DisplayFunc(void)
 		// Cannon base (subpart C):
 		glPushMatrix();
 			glTranslatef(0, P_HEIGHT, 0);     // Positions propeller on the plane
-			glRotatef(cannon_angle_top, 0, 1, 0);         // Rotates propeller   
+			glRotatef(45, 0, 1, 0);         // Rotates propeller   
 			drawCube(P_WIDTH, P_LENGTH, P_HEIGHT, colour_dark_gray);
 			DrawCoordinateFrame(1);
 
 			// Cannon (subpart C):
 			glPushMatrix();
 				glTranslatef(0, WING_LENGTH, 0);     // Positions propeller at the top
-				glRotatef(cannon_angle_subsubpart, 0, 1, 0);         // Rotates propeller   
+				glRotatef(-70, 0, 1, 0);         // Rotates propeller   
 				glRotatef(-90, 1, 0, 0);         // Rotates propeller   
 				DrawCannon(WING_WIDTH, WING_LENGTH, WING_HEIGHT, true);
 				DrawCoordinateFrame(1);
