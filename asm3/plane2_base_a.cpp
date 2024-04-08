@@ -85,10 +85,10 @@ int w_width = 800;
 int w_height = 600;
 
 // Plane pose (position-quaternion pair)
-gmtl::Point4f plane_p;      // Position for plane 2 (using explicit homogeneous form; see Quaternion example code)
+gmtl::Point4f turtle_p2;      // Position for plane 2 (using explicit homogeneous form; see Quaternion example code)
 gmtl::Quatf plane_q;        // Quaternion for plane 2
 
-gmtl::Point4f plane_p1;      // Position for plane 1 (using explicit homogeneous form; see Quaternion example code)
+gmtl::Point4f turtle_p1;      // Position for plane 1 (using explicit homogeneous form; see Quaternion example code)
 gmtl::Quatf plane_q1;        // Quaternion for plane 1
 
 // Quaternions to rotate plane
@@ -154,11 +154,11 @@ void InitTransforms()
 	const float SINTHETA_D2 = sin(gmtl::Math::deg2Rad(PLANE_ROTATION / 2));
 
 	// Inits plane 2 pose
-	plane_p.set(1.0f, 0.0f, 4.0f, 1.0f);
+	turtle_p2.set(3.0f, -5.0f, 4.0f, 1.0f);
 	plane_q.set(0, 0, 0, 1);
 
 	// Inits plane 1 pose
-	plane_p1.set(-1.0f, 5.0f, 4.0f, 1.0f);
+	turtle_p1.set(-3.0f, 5.0f, 4.0f, 1.0f);
 	plane_q1.set(0, 0, 0, 1);
 
 	// Z rotations (roll)
@@ -242,7 +242,7 @@ void DisplayFunc(void)
 		axis = aa.getAxis();
 		angle = aa.getAngle();
 		glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
-		glTranslatef(-plane_p[0], -plane_p[1], -plane_p[2]);
+		glTranslatef(-turtle_p2[0], -turtle_p2[1], -turtle_p2[2]);
 		break;
 
 		// TODO: Add case for the plane1's camera
@@ -256,7 +256,7 @@ void DisplayFunc(void)
 		axis = aa.getAxis();
 		angle = aa.getAngle();
 		glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
-		glTranslatef(-plane_p1[0], -plane_p1[1], -plane_p1[2]);
+		glTranslatef(-turtle_p1[0], -turtle_p1[1], -turtle_p1[2]);
 		break;
 	}
 
@@ -283,10 +283,18 @@ void DisplayFunc(void)
 		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
 		axis = aa.getAxis();
 		angle = aa.getAngle();
-		glTranslatef(plane_p[0], plane_p[1], plane_p[2]);
+		glTranslatef(turtle_p2[0], turtle_p2[1], turtle_p2[2]);
 		glRotatef(gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
 		DrawTurtleShell(P_WIDTH*1.5, P_LENGTH*1.5, P_HEIGHT*2); // turtle plane base
 		DrawCoordinateFrame(3);
+
+		// Turtle 2's camera:
+		glPushMatrix();
+			glRotatef(azimuth[1], 0, 1, 0);
+			glRotatef(elevation[1], 1, 0, 0);
+			glTranslatef(0, 0, distance[1]);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
 
 		//// head
 		glPushMatrix();
@@ -295,19 +303,108 @@ void DisplayFunc(void)
 			
 			// left eye
 			glPushMatrix();
-				glTranslatef(-0.27f * P_WIDTH, -0.20f * P_HEIGHT, 1.15f * P_LENGTH);
+				glTranslatef(-0.8f, -0.20f, 1.15f);
 				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
 			glPopMatrix();
 
 			// right eye
 			glPushMatrix();
-				glTranslatef(0.27f * P_WIDTH, -0.20f * P_HEIGHT, 1.15f * P_LENGTH);
+				glTranslatef(0.8f, -0.20f, 1.15f);
 				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
 			glPopMatrix();
 			
 		glPopMatrix();
 
-		// Plane 2's camera:
+		// Right front wing (subpart A):
+		glPushMatrix();
+			glTranslatef(WING_POS[0], WING_POS[1], WING_POS[2]);     // Positions propeller on the plane
+			glRotatef(wing_angle_right, 0, 0, 1);                                           // Rotates propeller
+			DrawWing(WING_WIDTH, WING_LENGTH, WING_HEIGHT, true);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
+
+		// Left front wing (subpart B):
+		glPushMatrix();
+			glTranslatef(-WING_POS[0], WING_POS[1], WING_POS[2]);     // Positions propeller on the plane
+			glRotatef(wing_angle_left, 0, 0, 1);                      // Rotates propeller
+			DrawWing(WING_WIDTH, WING_LENGTH, WING_HEIGHT, false);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
+
+		// Right back wing (subpart A):
+		glPushMatrix();
+			glTranslatef(WING_POS[0], WING_POS[1], -WING_POS[2]);     // Positions propeller on the plane
+			glRotatef(wing_angle_right, 0, 0, 1);                                           // Rotates propeller
+			DrawWing(WING_WIDTH_SMALL, WING_LENGTH, WING_HEIGHT, true);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
+
+		// Left back wing (subpart B):
+		glPushMatrix();
+			glTranslatef(-WING_POS[0], WING_POS[1], -WING_POS[2]);     // Positions propeller on the plane
+			glRotatef(wing_angle_left, 0, 0, 1);                      // Rotates propeller
+			DrawWing(WING_WIDTH_SMALL, WING_LENGTH, WING_HEIGHT, false);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
+
+		// Cannon base (subpart C):
+		glPushMatrix();
+			glTranslatef(0, P_HEIGHT, 0);     // Positions propeller on the plane
+			glRotatef(cannon_angle_top, 0, 1, 0);         // Rotates propeller   
+			drawCube(P_WIDTH, P_LENGTH, P_HEIGHT, colour_dark_gray);
+			DrawCoordinateFrame(1);
+
+			// Cannon (subpart C):
+			glPushMatrix();
+				glTranslatef(0, WING_LENGTH, 0);     // Positions propeller at the top
+				glRotatef(cannon_angle_subsubpart, 0, 1, 0);         // Rotates propeller   
+				glRotatef(-90, 1, 0, 0);         // Rotates propeller   
+				DrawCannon(WING_WIDTH, WING_LENGTH, WING_HEIGHT, true);
+				DrawCoordinateFrame(1);
+			glPopMatrix();
+		glPopMatrix();
+	glPopMatrix();
+
+	/////////////////////////////////////////////////////////////////////////
+
+	// Turtle 1 body:
+	glPushMatrix();
+		gmtl::set(aa, plane_q); // Converts plane's quaternion to axis-angle form to be used by glRotatef()
+		axis = aa.getAxis();
+		angle = aa.getAngle();
+		glTranslatef(turtle_p1[0], turtle_p1[1], turtle_p1[2]);
+		glRotatef(gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
+		DrawTurtleShell(P_WIDTH*1.5, P_LENGTH*1.5, P_HEIGHT*2);
+		DrawCoordinateFrame(3);
+
+		// Turtle 1's camera:
+		glPushMatrix();
+			glRotatef(azimuth[2], 0, 1, 0);
+			glRotatef(elevation[2], 1, 0, 0);
+			glTranslatef(0, 0, distance[2]);
+			DrawCoordinateFrame(1);
+		glPopMatrix();
+
+		//// head
+		glPushMatrix();
+			glTranslatef(0, -0.1f * P_HEIGHT, 0.7f * P_LENGTH);
+			drawCube(0.7f * P_WIDTH, 0.7f * P_LENGTH, 0.85f * P_HEIGHT, colour_lime_green);
+			
+			// left eye
+			glPushMatrix();
+				glTranslatef(-0.8f, -0.20f, 1.15f);
+				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+			glPopMatrix();
+
+			// right eye
+			glPushMatrix();
+				glTranslatef(0.8f, -0.20f, 1.15f);
+				drawCube(0.11f * P_WIDTH, 0.06f * P_LENGTH, 0.11f * P_HEIGHT, colour_dark_gray);
+			glPopMatrix();
+			
+		glPopMatrix();
+
+		// Turtle 2's camera:
 		glPushMatrix();
 			glRotatef(azimuth[1], 0, 1, 0);
 			glRotatef(elevation[1], 1, 0, 0);
@@ -365,25 +462,6 @@ void DisplayFunc(void)
 		glPopMatrix();
 	glPopMatrix();
 
-	// Turtle 1 body:
-	glPushMatrix();
-		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
-		axis = aa.getAxis();
-		angle = aa.getAngle();
-		glTranslatef(plane_p1[0], plane_p1[1], plane_p1[2]);
-		glRotatef(gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
-		DrawTurtleShell(P_WIDTH, P_LENGTH, P_HEIGHT);
-		DrawCoordinateFrame(3);
-
-		// Plane 1's camera:
-		glPushMatrix();
-			glRotatef(azimuth[2], 0, 1, 0);
-			glRotatef(elevation[2], 1, 0, 0);
-			glTranslatef(0, 0, distance[2]);
-			DrawCoordinateFrame(1);
-		glPopMatrix();
-	glPopMatrix();
-
 	glutSwapBuffers();                          // Replaces glFlush() to use double buffering
 }
 
@@ -418,16 +496,16 @@ void KeyboardFunc(unsigned char key, int x, int y)
 
 		//|____________________________________________________________________
 		//|
-		//| Plane 2 controls
+		//| Turtle 2 controls
 		//|____________________________________________________________________
 
 	case 's': { // Forward translation of the plane (+Z translation)  
 		gmtl::Quatf v_q = plane_q * gmtl::Quatf(PLANE_FORWARD[0], PLANE_FORWARD[1], PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q);
-		plane_p = plane_p + v_q.mData;
+		turtle_p2 = turtle_p2 + v_q.mData;
 	} break;
 	case 'f': { // Backward translation of the plane (-Z translation)
 		gmtl::Quatf v_q = plane_q * gmtl::Quatf(-PLANE_FORWARD[0], -PLANE_FORWARD[1], -PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q);
-		plane_p = plane_p + v_q.mData;
+		turtle_p2 = turtle_p2 + v_q.mData;
 	} break;
 
 	case 'e': // Rolls the plane (+Z rot)
@@ -454,16 +532,16 @@ void KeyboardFunc(unsigned char key, int x, int y)
 
 		//|____________________________________________________________________
 		//|
-		//| Plane 1 controls
+		//| Turtle 1 controls
 		//|____________________________________________________________________
 
 	case 'S': { // Forward translation of the plane (+Z translation)  
 		gmtl::Quatf v_q = plane_q1 * gmtl::Quatf(PLANE_FORWARD[0], PLANE_FORWARD[1], PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q1);
-		plane_p1 = plane_p1 + v_q.mData;
+		turtle_p1 = turtle_p1 + v_q.mData;
 	} break;
 	case 'F': { // Backward translation of the plane (-Z translation)
 		gmtl::Quatf v_q = plane_q1 * gmtl::Quatf(-PLANE_FORWARD[0], -PLANE_FORWARD[1], -PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q1);
-		plane_p1 = plane_p1 + v_q.mData;
+		turtle_p1 = turtle_p1 + v_q.mData;
 	} break;
 
 	case 'E': // Rolls the plane (+Z rot)
